@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050a14">
+<title>Philip McKrillion</title>
+<meta name="description" content="Seven questions. Rare answers sink you deeper. How far down can you go?">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --abyss:#050a14;
+  --ink:#eaf3fa;
+  --soft:rgba(234,243,250,.78);
+  --panel:rgba(5,10,20,.55);
+  --line:rgba(170,205,232,.16);
+  --focus:#7cf3d0;
+  --krill:#ff6477;
+  --t0:#9fb2c6; --t1:#43c6cf; --t2:#a08cff; --t3:#ffa24a; --t4:#ff6477;
+}
+*{box-sizing:border-box}
+html{background:var(--abyss);-webkit-text-size-adjust:100%}
+body{
+  margin:0; min-height:100dvh; color:var(--ink);
+  font-family:'Bricolage Grotesque',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  font-optical-sizing:auto; line-height:1.45; font-size:1.0625rem;
+}
+#sea{position:fixed;inset:0;z-index:-3;background-color:#0e5a78;transition:background-color 1.8s ease}
+#sea.snap{transition:none}
+#light{position:fixed;inset:0;z-index:-2;pointer-events:none;transition:opacity 1.8s ease;
+  background:radial-gradient(110% 55% at 50% -8%,rgba(130,235,245,.38),transparent 72%)}
+#vig{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(to bottom,rgba(2,4,10,0) 35%,rgba(2,4,10,.5))}
+
+.wrap{max-width:34rem;margin:0 auto;padding:max(1.1rem,env(safe-area-inset-top)) 1.25rem max(2.5rem,env(safe-area-inset-bottom))}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem}
+.mark{display:flex;align-items:center;gap:.55rem;font-weight:700;letter-spacing:-.01em;font-size:1.05rem}
+.mark svg{width:2.4rem;height:auto;color:var(--krill);flex:none}
+.readout{font-variant-numeric:tabular-nums;font-weight:600;font-size:1.05rem;white-space:nowrap}
+.readout small{font-weight:400;color:var(--soft);margin-right:.35rem}
+
+/* progress */
+.segs{list-style:none;margin:0 0 1.75rem;padding:0;display:grid;grid-template-columns:repeat(7,1fr);gap:.35rem}
+.seg{height:.4rem;border-radius:99px;background:rgba(234,243,250,.2)}
+.seg.now{background:transparent;box-shadow:inset 0 0 0 2px rgba(234,243,250,.85);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.45}}
+
+/* generic */
+h1,h2,h3,p{margin:0}
+.btn{
+  appearance:none;border:0;cursor:pointer;font:inherit;font-weight:700;
+  background:#eaf6ff;color:#04101c;padding:.85rem 1.4rem;border-radius:12px;
+  transition:transform .12s ease,background-color .15s ease,opacity .15s ease;
+}
+.btn:hover:not(:disabled){background:#fff}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px rgba(234,243,250,.5)}
+.btn.ghost:hover:not(:disabled){background:rgba(234,243,250,.12)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:1.25rem}
+
+/* intro */
+.herokrill{margin:1.2rem 0 1.4rem;color:var(--krill)}
+.herokrill svg{width:5.2rem;height:auto;display:block}
+.hero h1{font-size:clamp(2.6rem,11vw,3.9rem);line-height:.95;letter-spacing:-.035em;font-weight:800;font-variation-settings:'wdth' 100}
+.hero .lede{margin-top:1rem;font-size:1.25rem;color:var(--soft);max-width:26rem}
+.rules{list-style:none;margin:2rem 0;padding:0}
+.rules li{padding:.8rem 0;border-top:1px solid var(--line)}
+.rules li:last-child{border-bottom:1px solid var(--line)}
+.rules b{font-weight:700}
+
+/* ask */
+.qlabel{color:var(--soft);font-size:.95rem;margin-bottom:.5rem}
+.prompt{font-size:clamp(1.65rem,6.2vw,2.2rem);line-height:1.12;letter-spacing:-.02em;font-weight:700;margin-bottom:1.5rem;text-wrap:balance}
+.clock{display:flex;align-items:center;gap:.9rem;margin-bottom:1.1rem}
+.track{flex:1;height:.5rem;border-radius:99px;background:rgba(234,243,250,.18);overflow:hidden}
+.fill{height:100%;width:100%;background:#7fe3ee;transform-origin:left center;border-radius:99px}
+.fill.low{background:var(--krill)}
+.time{font-variant-numeric:tabular-nums;font-weight:700;min-width:3.1rem;text-align:right}
+.time.low{color:#ff9aa7}
+.answer{display:flex;gap:.6rem}
+.answer input{
+  flex:1;min-width:0;font:inherit;font-size:1.1rem;color:var(--ink);
+  background:rgba(5,10,20,.6);border:1.5px solid rgba(170,205,232,.3);border-radius:12px;padding:.85rem 1rem;
+}
+.answer input::placeholder{color:rgba(234,243,250,.45)}
+.answer input:focus{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px rgba(124,243,208,.25)}
+.msg{min-height:1.4rem;margin-top:.7rem;color:#ff9aa7;font-weight:600;overflow-wrap:anywhere}
+.msg.shake{animation:shake .35s}
+@keyframes shake{20%{transform:translateX(-5px)}50%{transform:translateX(5px)}80%{transform:translateX(-3px)}}
+.note{margin-top:.3rem;color:var(--soft);font-size:.95rem}
+
+/* reveal */
+.reveal .said{color:var(--soft);margin-bottom:.9rem;overflow-wrap:anywhere}
+.reveal .said b{color:var(--ink)}
+.tierline{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:.9rem}
+.tiername{font-size:clamp(1.9rem,8vw,2.6rem);font-weight:800;letter-spacing:-.025em;line-height:1}
+.gain{font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.comment{font-size:clamp(1.3rem,5vw,1.65rem);line-height:1.2;font-weight:600;letter-spacing:-.01em;margin-bottom:1.6rem;text-wrap:pretty}
+.depthline{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);padding-top:1rem;margin-bottom:1.5rem;color:var(--soft)}
+.depthline strong{color:var(--ink);font-size:1.35rem;font-variant-numeric:tabular-nums}
+
+/* results */
+.banner{padding:.7rem 1rem;border-radius:12px;background:rgba(234,243,250,.12);margin-bottom:1.25rem;font-size:.95rem}
+.final .reach{color:var(--soft);margin-bottom:.35rem}
+.final .big{font-size:clamp(3.4rem,17vw,5.5rem);font-weight:800;letter-spacing:-.045em;line-height:.95;font-variant-numeric:tabular-nums}
+.final .of{color:var(--soft);margin-top:.6rem}
+.final .zone{margin-top:1.1rem;font-size:1.2rem;font-weight:700}
+.final .zonenote{color:var(--soft)}
+.actions{display:flex;gap:.7rem;flex-wrap:wrap;margin:1.5rem 0 2.5rem}
+.sharepreview{white-space:pre-wrap;font:inherit;color:var(--soft);margin:0;font-size:.95rem}
+
+.listhead{font-size:1.35rem;font-weight:800;letter-spacing:-.02em;margin-bottom:.35rem}
+.listsub{color:var(--soft);margin-bottom:1.25rem}
+.qcard{margin-bottom:1rem}
+.qcard header{display:flex;gap:.8rem;align-items:baseline;margin-bottom:.75rem}
+.qn{flex:none;width:1.7rem;height:1.7rem;border-radius:50%;display:grid;place-items:center;font-size:.85rem;font-weight:700;background:rgba(234,243,250,.16)}
+.qcard h3{font-size:1.1rem;line-height:1.25;font-weight:700;text-wrap:pretty}
+.you{margin-bottom:1rem;padding:.65rem .85rem;border-radius:10px;background:rgba(234,243,250,.09);font-size:.97rem;overflow-wrap:anywhere}
+.you b{font-weight:700}
+.ladder{display:grid;gap:.85rem}
+.rung{display:grid;grid-template-columns:7.6rem 1fr;gap:.25rem .8rem;align-items:start}
+.rung .rn{font-weight:700;font-size:.92rem;line-height:1.9}
+.rung .rn span{display:block;font-weight:400;color:var(--soft);font-size:.82rem;line-height:1.1;margin-top:-.25rem}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem}
+.chip{padding:.2rem .65rem;border-radius:99px;font-size:.92rem;background:rgba(234,243,250,.08);box-shadow:inset 0 0 0 1px rgba(234,243,250,.14)}
+.chip.mine{background:var(--c);color:#04101c;font-weight:700;box-shadow:none}
+.chip.mine::after{content:" \2713"}
+.quip{grid-column:2;color:var(--soft);font-size:.92rem;font-style:italic;text-wrap:pretty}
+@media (max-width:30rem){
+  .rung{grid-template-columns:1fr}
+  .rung .rn{line-height:1.3}
+  .rung .rn span{display:inline;margin:0 0 0 .4rem}
+  .quip{grid-column:1}
+}
+@media (prefers-reduced-motion:reduce){
+  #sea,#light{transition:none}
+  .seg.now,.msg.shake{animation:none}
+}
+</style>
+</head>
+<body>
+<div id="sea" class="snap"></div>
+<div id="light"></div>
+<div id="vig"></div>
+<div class="wrap"><main id="app"><noscript>This game needs JavaScript turned on.</noscript></main></div>
+
+<script>
+(()=>{
+'use strict';
+
+/* ---------- data (encoded so a casual view-source doesn't spoil it) ---------- */
+const DATA=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob('W3sicHJvbXB0IjoiTmFtZSBhIHZhcnNpdHkgc3BvcnQgYXQgTm9ydGggU3ByaW5ncyIsImFuc3dlcnMiOlt7ImEiOiJGb290YmFsbCIsInQiOjAsImMiOiJXb21wIFdvbXAifSx7ImEiOiJCYXNrZXRiYWxsIiwidCI6MCwiYyI6IldvbXAgV29tcCJ9LHsiYSI6IkJhc2ViYWxsIiwidCI6MCwiYyI6IldvbXAgV29tcCJ9LHsiYSI6IlNvY2NlciIsInQiOjAsImMiOiJXb21wIFdvbXAifSx7ImEiOiJDcm9zcyBDb3VudHJ5IiwidCI6MSwiYyI6IkRlY2VudCBQdWxsLiJ9LHsiYSI6IlRyYWNrIiwidCI6MSwiYyI6IkRlY2VudCBQdWxsLiJ9LHsiYSI6IlRlbm5pcyIsInQiOjEsImMiOiJEZWNlbnQgUHVsbC4ifSx7ImEiOiJMYWNyb3NzZSIsInQiOjEsImMiOiJEZWNlbnQgUHVsbC4ifSx7ImEiOiJTb2Z0YmFsbCIsInQiOjEsImMiOiJEZWNlbnQgUHVsbC4ifSx7ImEiOiJTd2ltbWluZyIsInQiOjIsImMiOiJHZW51aW5lbHkgVW5jb21tb24uIE5pY2UgUHVsbC4ifSx7ImEiOiJHb2xmIiwidCI6MiwiYyI6IkdlbnVpbmVseSBVbmNvbW1vbi4gTmljZSBQdWxsLiJ9LHsiYSI6IkNoZWVyIiwidCI6MiwiYyI6IkdlbnVpbmVseSBVbmNvbW1vbi4gTmljZSBQdWxsLiJ9LHsiYSI6IldhdGVyIFBvbG8iLCJ0IjoyLCJjIjoiR2VudWluZWx5IFVuY29tbW9uLiBOaWNlIFB1bGwuIn0seyJhIjoiV3Jlc3RsaW5nIiwidCI6MywiYyI6Ildvdy4gRmV3IGdvIHRoaXMgZGVlcC4ifSx7ImEiOiJGZW5jaW5nIiwidCI6MywiYyI6Ildvdy4gRmV3IGdvIHRoaXMgZGVlcC4ifSx7ImEiOiJHaXJscycgRmxhZyBGb290YmFsbCIsInQiOjQsImMiOiJcIkNvYWNoIEsgKEVnZ21hbikgd2FzIHRoZSBoZWFkIGNvYWNoIG91ciBzZW5pb3IgeWVhcixcIiJ9XX0seyJwcm9tcHQiOiJOYW1lIGEgdGVhY2hlciB3aG8gdGF1Z2h0IGEgZnJlc2htYW4tbGV2ZWwgY2xhc3MgKHdoZW4gd2Ugd2VyZSBmcmVzaG1lbikgKChJIGRlZmluaXRlbHkgZm9yZ290IHNvbWUpKSIsImFuc3dlcnMiOlt7ImEiOiJPbHNvbiIsInQiOjAsImMiOiJXb21wIFdvbXAifSx7ImEiOiJQZWthdG9zIiwidCI6MCwiYyI6IldvbXAgV29tcCJ9LHsiYSI6IlBleXRvbiIsInQiOjEsImMiOiJEZWNlbnQgUHVsbC4ifSx7ImEiOiJQZWV0IiwidCI6MSwiYyI6IkRlY2VudCBQdWxsLiJ9LHsiYSI6Ikx1cGlhbmkiLCJ0IjoyLCJjIjoiR2VudWluZWx5IFVuY29tbW9uLiBOaWNlIFB1bGwuIn0seyJhIjoiSGVuZGVyc29uIiwidCI6MiwiYyI6IkdlbnVpbmVseSBVbmNvbW1vbi4gTmljZSBQdWxsLiJ9LHsiYSI6IkVud29yb20iLCJ0IjoyLCJjIjoiR2VudWluZWx5IFVuY29tbW9uLiBOaWNlIFB1bGwuIn0seyJhIjoiRmVycmlzIiwidCI6MiwiYyI6IkdlbnVpbmVseSBVbmNvbW1vbi4gTmljZSBQdWxsLiJ9LHsiYSI6IlRob21hcyIsInQiOjIsImMiOiJHZW51aW5lbHkgVW5jb21tb24uIE5pY2UgUHVsbC4ifSx7ImEiOiJTaW5nZXIiLCJ0IjoyLCJjIjoiR2VudWluZWx5IFVuY29tbW9uLiBOaWNlIFB1bGwuIn0seyJhIjoiQmVuaXRleiIsInQiOjIsImMiOiJHZW51aW5lbHkgVW5jb21tb24uIE5pY2UgUHVsbC4ifSx7ImEiOiJEaWVuZXIiLCJ0IjozLCJjIjoiV293LiBGZXcgZ28gdGhpcyBkZWVwLiJ9LHsiYSI6IkNhdGNoaW5ncyIsInQiOjMsImMiOiJXb3cuIEZldyBnbyB0aGlzIGRlZXAuIn0seyJhIjoiTWFydGluIiwidCI6MywiYyI6Ildvdy4gRmV3IGdvIHRoaXMgZGVlcC4ifSx7ImEiOiJEYXJkZW4iLCJ0Ijo0LCJjIjoiUmVzdCBpbiBQZWFjZS4ifV19LHsicHJvbXB0IjoiTmFtZSBhIHRlYW0gTm9ydGggU3ByaW5ncyBoYXMgYmVhdGVuIGluIGZvb3RiYWxsIGluIHRoZSBsYXN0IDEwIHllYXJzIiwiYW5zd2VycyI6W3siYSI6IlJpdmVyd29vZCIsInQiOjAsImMiOiJXb21wIFdvbXAifSx7ImEiOiJNaWR0b3duIiwidCI6MSwiYyI6IkRlY2VudCBQdWxsLiJ9LHsiYSI6IkNsYXJrc3RvbiIsInQiOjEsImMiOiJEZWNlbnQgUHVsbC4ifSx7ImEiOiJOb3J0aHZpZXciLCJ0IjoxLCJjIjoiRGVjZW50IFB1bGwuIn0seyJhIjoiTUxLIiwidCI6MiwiYyI6IkdlbnVpbmVseSBVbmNvbW1vbi4gTmljZSBQdWxsLiJ9LHsiYSI6Ildvb2RsYW5kIiwidCI6MiwiYyI6IkdlbnVpbmVseSBVbmNvbW1vbi4gTmljZSBQdWxsLiJ9LHsiYSI6IkxpdGhpYSBTcHJpbmdzIiwidCI6MiwiYyI6IkdlbnVpbmVseSBVbmNvbW1vbi4gTmljZSBQdWxsLiJ9LHsiYSI6IkRlY2F0dXIiLCJ0IjoyLCJjIjoiR2VudWluZWx5IFVuY29tbW9uLiBOaWNlIFB1bGwuIn0seyJhIjoiS0lQUCIsInQiOjMsImMiOiJXb3cuIEZldyBnbyB0aGlzIGRlZXAuIn0seyJhIjoiVG93ZXJzIiwidCI6MywiYyI6Ildvdy4gRmV3IGdvIHRoaXMgZGVlcC4ifSx7ImEiOiJTYWxlbSIsInQiOjMsImMiOiJXb3cuIEZldyBnbyB0aGlzIGRlZXAuIn0seyJhIjoiQ3Jvc3MgS2V5cyIsInQiOjQsImMiOiJPdXIgOHRoIGdyYWRlIHllYXIsIHRoZXkgdHVybmVkIHRoZSBzY29yZWJvYXJkIG9mZiBiZWNhdXNlIHdlIHNjb3JlZCBvdmVyIDEwMC4ifV19LHsicHJvbXB0IjoiTmFtZSBhbiBBUCBDbGFzcyBvZmZlcmVkIGF0IE5vcnRoIFNwcmluZ3MgKGZ1bGwgbmFtZXMsIGRvbid0IHdyaXRlIEFQKSIsImFuc3dlcnMiOlt7ImEiOiJIdW1hbiBHZW9ncmFwaHkiLCJ0IjowLCJjIjoiV29tcCBXb21wIn0seyJhIjoiV29ybGQgSGlzdG9yeSIsInQiOjAsImMiOiJXb21wIFdvbXAifSx7ImEiOiJVLlMuIEhpc3RvcnkiLCJ0IjowLCJjIjoiV29tcCBXb21wIn0seyJhIjoiU3RhdGlzdGljcyIsInQiOjAsImMiOiJXb21wIFdvbXAifSx7ImEiOiJCaW9sb2d5IiwidCI6MSwiYyI6IkRlY2VudCBQdWxsLiJ9LHsiYSI6IkNoZW1pc3RyeSIsInQiOjEsImMiOiJEZWNlbnQgUHVsbC4ifSx7ImEiOiJMYXRpbiIsInQiOjEsImMiOiJEZWNlbnQgUHVsbC4ifSx7ImEiOiJMaXRlcmF0dXJlIiwidCI6MSwiYyI6IkRlY2VudCBQdWxsLiJ9LHsiYSI6Ikxhbmd1YWdlIiwidCI6MSwiYyI6IkRlY2VudCBQdWxsLiJ9LHsiYSI6IkdvdmVybm1lbnQiLCJ0IjoyLCJjIjoiR2VudWluZWx5IFVuY29tbW9uLiBOaWNlIFB1bGwuIn0seyJhIjoiTWFjcm9lY29ub21pY3MiLCJ0IjoyLCJjIjoiR2VudWluZWx5IFVuY29tbW9uLiBOaWNlIFB1bGwuIn0seyJhIjoiUHN5Y2hvbG9neSIsInQiOjIsImMiOiJHZW51aW5lbHkgVW5jb21tb24uIE5pY2UgUHVsbC4ifSx7ImEiOiJDYWxjdWx1cyBBQiIsInQiOjIsImMiOiJHZW51aW5lbHkgVW5jb21tb24uIE5pY2UgUHVsbC4ifSx7ImEiOiJDYWxjdWx1cyBCQyIsInQiOjIsImMiOiJHZW51aW5lbHkgVW5jb21tb24uIE5pY2UgUHVsbC4ifSx7ImEiOiJQaHlzaWNzIDEiLCJ0IjoyLCJjIjoiR2VudWluZWx5IFVuY29tbW9uLiBOaWNlIFB1bGwuIn0seyJhIjoiRW52aXJvbm1lbnQgU2NpZW5jZSIsInQiOjIsImMiOiJHZW51aW5lbHkgVW5jb21tb24uIE5pY2UgUHVsbC4ifSx7ImEiOiJTcGFuaXNoIiwidCI6MiwiYyI6IkdlbnVpbmVseSBVbmNvbW1vbi4gTmljZSBQdWxsLiJ9LHsiYSI6IkZyZW5jaCIsInQiOjIsImMiOiJHZW51aW5lbHkgVW5jb21tb24uIE5pY2UgUHVsbC4ifSx7ImEiOiJDb21wdXRlciBTY2llbmNlIiwidCI6MiwiYyI6IkdlbnVpbmVseSBVbmNvbW1vbi4gTmljZSBQdWxsLiJ9LHsiYSI6IkV1cm9wZWFuIEhpc3RvcnkiLCJ0IjozLCJjIjoiV293LiBGZXcgZ28gdGhpcyBkZWVwLiJ9LHsiYSI6IkNvbXB1dGVyIFNjaWVuY2UgUHJpbmNpcGxlcyIsInQiOjMsImMiOiJXb3cuIEZldyBnbyB0aGlzIGRlZXAuIn0seyJhIjoiTXVzaWMgVGhlb3J5IiwidCI6MywiYyI6Ildvdy4gRmV3IGdvIHRoaXMgZGVlcC4ifSx7ImEiOiJBcnQiLCJ0IjozLCJjIjoiV293LiBGZXcgZ28gdGhpcyBkZWVwLiJ9LHsiYSI6IlN0dWRpbyBBcnQiLCJ0IjozLCJjIjoiV293LiBGZXcgZ28gdGhpcyBkZWVwLiJ9LHsiYSI6IkFydDogMi1EIERlc2lnbiIsInQiOjMsImMiOiJXb3cuIEZldyBnbyB0aGlzIGRlZXAuIn0seyJhIjoiQXJ0OiAzLUQgRGVzaWduIiwidCI6MywiYyI6Ildvdy4gRmV3IGdvIHRoaXMgZGVlcC4ifSx7ImEiOiJQaHlzaWNzIEMiLCJ0IjozLCJjIjoiV293LiBGZXcgZ28gdGhpcyBkZWVwLiJ9LHsiYSI6IlByZWNhbGN1bHVzIiwidCI6NCwiYyI6Ik1yLiBHIHN0YXJ0ZWQgdGVhY2hpbmcgaXQgYWZ0ZXIgd2UgbGVmdC4ifV19LHsicHJvbXB0IjoiTmFtZSBhIG1lbWJlciBvZiB0aGUgTERHIGdyb3VwIGNoYXQgKGZpcnN0IG5hbWVzIG9ubHkgZm9yIHNpbXBsaWNpdHkpIiwiYW5zd2VycyI6W3siYSI6IkR5bGFuIiwidCI6MCwiYyI6IldvbXAgV29tcCJ9LHsiYSI6Ikpha2UiLCJ0IjoxLCJjIjoiRGVjZW50IFB1bGwuIn0seyJhIjoiTWF0dCIsInQiOjEsImMiOiJEZWNlbnQgUHVsbC4ifSx7ImEiOiJNYXgiLCJ0IjoxLCJjIjoiRGVjZW50IFB1bGwuIn0seyJhIjoiSmFzb24iLCJ0IjoyLCJjIjoiR2VudWluZWx5IFVuY29tbW9uLiBOaWNlIFB1bGwuIn0seyJhIjoiRGFuaSIsInQiOjIsImMiOiJHZW51aW5lbHkgVW5jb21tb24uIE5pY2UgUHVsbC4ifSx7ImEiOiJTdGVlbGUiLCJ0IjoyLCJjIjoiR2VudWluZWx5IFVuY29tbW9uLiBOaWNlIFB1bGwuIn0seyJhIjoiTHVpcyIsInQiOjIsImMiOiJHZW51aW5lbHkgVW5jb21tb24uIE5pY2UgUHVsbC4ifSx7ImEiOiJTYW1teSIsInQiOjIsImMiOiJHZW51aW5lbHkgVW5jb21tb24uIE5pY2UgUHVsbC4ifSx7ImEiOiJUeWxlciIsInQiOjIsImMiOiJHZW51aW5lbHkgVW5jb21tb24uIE5pY2UgUHVsbC4ifSx7ImEiOiJFdmFuIiwidCI6MywiYyI6Ildvdy4gRmV3IGdvIHRoaXMgZGVlcC4ifSx7ImEiOiJSb3dhbiIsInQiOjMsImMiOiJXb3cuIEZldyBnbyB0aGlzIGRlZXAuIn0seyJhIjoiQ29ubm9yIiwidCI6MywiYyI6Ildvdy4gRmV3IGdvIHRoaXMgZGVlcC4ifSx7ImEiOiJWaW5jZW50IiwidCI6MywiYyI6Ildvdy4gRmV3IGdvIHRoaXMgZGVlcC4ifSx7ImEiOiJQYXJpcyIsInQiOjQsImMiOiJIaXMgYWRkaXRpb24gbWFya2VkIHRoZSBiZWdpbm5pbmcgb2YgdGhlIGVuZCwifV19LHsicHJvbXB0IjoiTmFtZSBhIGplcnNleSBzb21lb25lIHdvcmUgZm9yIEhhbGxvd2VlbiAyMDIxIiwiYW5zd2VycyI6W3siYSI6IlJheSBMZXdpcyIsInQiOjAsImMiOiJXb21wIFdvbXAifSx7ImEiOiJSYXkgUmljZSIsInQiOjEsImMiOiJEZWNlbnQgUHVsbC4ifSx7ImEiOiJPLkouIFNpbXBzb24iLCJ0IjoxLCJjIjoiRGVjZW50IFB1bGwuIn0seyJhIjoiQmVuIFJvZXRobGlzYmVyZ2VyIiwidCI6MSwiYyI6IkRlY2VudCBQdWxsLiJ9LHsiYSI6IkRlaW9uIFNhbmRlcnMiLCJ0IjoyLCJjIjoiR2VudWluZWx5IFVuY29tbW9uLiBOaWNlIFB1bGwuIn0seyJhIjoiS2FyZWVtIEh1bnQiLCJ0IjoyLCJjIjoiR2VudWluZWx5IFVuY29tbW9uLiBOaWNlIFB1bGwuIn0seyJhIjoiTWljaGFlbCBWaWNrIiwidCI6MiwiYyI6IkdlbnVpbmVseSBVbmNvbW1vbi4gTmljZSBQdWxsLiJ9LHsiYSI6Ikp1bGlvIEpvbmVzIiwidCI6MywiYyI6Ildvdy4gRmV3IGdvIHRoaXMgZGVlcC4ifSx7ImEiOiJaYWNoIFdpbHNvbiIsInQiOjMsImMiOiJXb3cuIEZldyBnbyB0aGlzIGRlZXAuIn0seyJhIjoiTWFyayBTYW5jaGV6IiwidCI6NCwiYyI6IlRoZSBCdXR0IEZ1bWJsZSB3YXMgY3JpbWluYWwsIGFwcGFyZW50bHkuIn1dfSx7InByb21wdCI6Ik5hbWUgYSBtZW1iZXIgb2Ygb3VyIFRvcCAxMCAoR1BBIHJhbmssIGZ1bGwgbmFtZSkiLCJhbnN3ZXJzIjpbeyJhIjoiSmFjb2IgTWlyc2t5IiwidCI6MCwiYyI6IldvbXAgV29tcCJ9LHsiYSI6IlNvcGhpYSBIYXdraW5zIiwidCI6MSwiYyI6IkRlY2VudCBQdWxsLiJ9LHsiYSI6IkhhbXB0b24gQ2hhcHBlbGwiLCJ0IjoxLCJjIjoiRGVjZW50IFB1bGwuIn0seyJhIjoiRW55YSBQZXJyeSIsInQiOjEsImMiOiJEZWNlbnQgUHVsbC4ifSx7ImEiOiJKYWtlIFNraWJhIiwidCI6MiwiYyI6IkdlbnVpbmVseSBVbmNvbW1vbi4gTmljZSBQdWxsLiJ9LHsiYSI6IlNhbSBEdXJiaW4iLCJ0IjoyLCJjIjoiR2VudWluZWx5IFVuY29tbW9uLiBOaWNlIFB1bGwuIn0seyJhIjoiQ2F0IEtpdGNoZW5zIiwidCI6MiwiYyI6IkdlbnVpbmVseSBVbmNvbW1vbi4gTmljZSBQdWxsLiJ9LHsiYSI6Ik1hdHRoZXcgU3phYm8iLCJ0IjozLCJjIjoiV293LiBGZXcgZ28gdGhpcyBkZWVwLiJ9LHsiYSI6IkR5bGFuIFJlaWQiLCJ0IjozLCJjIjoiV293LiBGZXcgZ28gdGhpcyBkZWVwLiJ9LHsiYSI6IkthdGllIEdyaWZmaW4iLCJ0Ijo0LCJjIjoiTmljZSBtZW1vcnkuIn1dfV0='),c=>c.charCodeAt(0))));
+
+const TIERS=[
+  {name:'Common',            pts:10, color:'var(--t0)', sq:'\u2B1C'},
+  {name:'Schooler',          pts:30, color:'var(--t1)', sq:'\uD83D\uDFE6'},
+  {name:'Rare',              pts:60, color:'var(--t2)', sq:'\uD83D\uDFEA'},
+  {name:'Deep Cut',          pts:85, color:'var(--t3)', sq:'\uD83D\uDFE7'},
+  {name:'One in a Krillion', pts:100,color:'var(--t4)', sq:'\uD83D\uDFE5'}
+];
+const MISS_SQ='\u2B1B';
+const SECONDS=60, N=DATA.length, MAX_PTS=N*100, MAX_M=MAX_PTS*10;
+const KEY='philip-mckrillion-v1';
+
+const ZONES=[
+  {upTo:200,  name:'Sunlight zone',  note:'Still bright enough for plants to grow.'},
+  {upTo:1000, name:'Twilight zone',  note:'Faint light, and it fades fast.'},
+  {upTo:4000, name:'Midnight zone',  note:'No sunlight reaches this far.'},
+  {upTo:6000, name:'Abyssal zone',   note:'Near-freezing water and crushing pressure.'},
+  {upTo:1e9,  name:'Hadal zone',     note:'The deep trenches. Almost nobody gets here.'}
+];
+const zoneOf=m=>ZONES.find(z=>m<z.upTo);
+
+const KRILL=`<svg viewBox="0 0 74 46" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round">
+<path d="M11 34C21 7 51 5 63 25" stroke-width="9" stroke-dasharray="6 2.2"/>
+<path d="M66 20c4-4 6-8 7-12M67 23c4-2 6-5 7-8" stroke-width="1.3"/>
+<path d="M9 35 3 31M9 36 3 39M10 37 6 43" stroke-width="1.6"/>
+<path d="M27 27l-2 7M35 25l-1 8M43 25l1 8M51 28l3 6" stroke-width="1.5"/></g>
+<circle cx="61.5" cy="22" r="1.9" fill="#050a14"/></svg>`;
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const app=$('#app'), sea=$('#sea'), light=$('#light');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtM=n=>Math.round(n).toLocaleString('en-US')+' m';
+const fmtT=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Exact matching only: case, extra spaces and curly-vs-straight quotes are ignored.
+// No aliases, no autocorrect, no fuzzy matching.
+const norm=s=>String(s).normalize('NFKC').replace(/[\u2018\u2019\u02BC]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/\s+/g,' ').trim().toLowerCase();
+const LOOKUP=DATA.map(q=>new Map(q.answers.map(a=>[norm(a.a),a])));
+
+/* ---------- state + one-dive lock ---------- */
+let mem=null;
+function load(){try{const s=localStorage.getItem(KEY);return s?JSON.parse(s):mem}catch(e){return mem}}
+function save(s){mem=s;try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
+function wipe(){try{localStorage.removeItem(KEY)}catch(e){} mem=null; history.replaceState(null,'',location.pathname+location.search)}
+if(location.hash==='#reset')wipe();
+let state=load();
+let justFinished=false, timer=null, locked=false, booted=false;
+addEventListener('hashchange',()=>{if(location.hash==='#reset'){wipe();state=null;justFinished=false;render()}});
+
+const pointsOf=(res,upTo=res.length)=>res.slice(0,upTo).reduce((t,r)=>t+(r?r.pts:0),0);
+const depthOf=(res,upTo)=>pointsOf(res,upTo)*10;
+
+/* ---------- the sea: colour and light follow depth ---------- */
+const STOPS=[[0,[14,90,120]],[.12,[10,62,96]],[.4,[8,34,64]],[.75,[5,14,31]],[1,[2,4,10]]];
+function seaColor(f){
+  for(let i=1;i<STOPS.length;i++){
+    if(f<=STOPS[i][0]){
+      const [a,ca]=STOPS[i-1],[b,cb]=STOPS[i],t=(f-a)/(b-a);
+      return 'rgb('+ca.map((v,k)=>Math.round(v+(cb[k]-v)*t)).join(',')+')';
+    }
+  }
+  return 'rgb(2,4,10)';
+}
+function setSea(m,instant){
+  const f=Math.min(1,m/MAX_M);
+  if(instant){sea.classList.add('snap');}
+  sea.style.backgroundColor=seaColor(f);
+  light.style.opacity=String(Math.max(0,1-f*1.6));
+  if(instant){void sea.offsetWidth;sea.classList.remove('snap');}
+}
+
+function countTo(el,from,to,ms){
+  if(reduced||from===to){el.textContent=fmtM(to);return}
+  const t0=performance.now();
+  (function step(now){
+    const p=Math.min(1,(now-t0)/ms), e=1-Math.pow(1-p,3);
+    el.textContent=fmtM(from+(to-from)*e);
+    if(p<1)requestAnimationFrame(step);
+  })(t0);
+}
+
+/* ---------- shared chrome ---------- */
+function header(m){
+  return `<div class="top"><div class="mark">${KRILL}<span>Philip McKrillion</span></div>
+  <div class="readout" aria-label="Current depth"><small>Depth</small><span id="hdepth">${fmtM(m)}</span></div></div>`;
+}
+function segs(){
+  const res=state?state.res:[];
+  return `<ol class="segs" aria-label="Progress, ${N} questions">`+DATA.map((_,i)=>{
+    const r=res[i];
+    let cls='seg',st='';
+    if(r)st=`background:${r.tier>=0?TIERS[r.tier].color:'#3a4c61'}`;
+    else if(state&&state.phase==='asking'&&i===state.idx)cls+=' now';
+    return `<li class="${cls}" style="${st}"></li>`;
+  }).join('')+`</ol>`;
+}
+function show(html){app.innerHTML=html;booted=true;window.scrollTo(0,0)}
+
+/* ---------- screens ---------- */
+function intro(){
+  setSea(0,true);
+  show(`<section class="hero">
+    <div class="herokrill">${KRILL}</div>
+    <h1>Philip McKrillion</h1>
+    <p class="lede">${N} questions. Rare answers sink you deeper. Obvious ones barely count.</p>
+    <ul class="rules">
+      <li><b>${SECONDS} seconds</b> for each question.</li>
+      <li><b>Spell it exactly.</b> No autocorrect, no alternate names.</li>
+      <li><b>Unlimited tries</b> until time runs out. Your first accepted answer is the one that scores.</li>
+      <li><b>One dive per browser.</b> Refreshing the page won't reset it.</li>
+      <li>Every possible answer is revealed at the end.</li>
+    </ul>
+    <button class="btn" id="go" type="button">Dive in</button>
+  </section>`);
+  $('#go').addEventListener('click',()=>{
+    state={v:1,idx:0,phase:'asking',qStart:Date.now(),tries:0,res:[]};
+    save(state);render();
+  });
+}
+
+function ask(){
+  const q=DATA[state.idx], before=depthOf(state.res);
+  setSea(before,!booted);
+  locked=false;
+  show(`${header(before)}${segs()}
+  <section>
+    <p class="qlabel">Question ${state.idx+1} of ${N}</p>
+    <h2 class="prompt">${esc(q.prompt)}</h2>
+    <div class="clock" role="timer" aria-label="Time left">
+      <div class="track"><div class="fill" id="fill"></div></div>
+      <div class="time" id="time">${fmtT(SECONDS*1000)}</div>
+    </div>
+    <form class="answer" id="form" autocomplete="off">
+      <input id="inp" type="text" maxlength="60" placeholder="Type your answer" aria-label="Your answer"
+        autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done">
+      <button class="btn" id="lock" type="submit" disabled>Lock in</button>
+    </form>
+    <p class="msg" id="msg" role="status"></p>
+    <p class="note">Exact spelling counts. Not on the list? Try again until time runs out.</p>
+  </section>`);
+  const inp=$('#inp'), lock=$('#lock'), fill=$('#fill'), time=$('#time');
+  inp.addEventListener('input',()=>{lock.disabled=!inp.value.trim()});
+  const msg=$('#msg');
+  $('#form').addEventListener('submit',e=>{
+    e.preventDefault();
+    const v=inp.value;if(!v.trim())return;
+    if(LOOKUP[state.idx].has(norm(v))){finalize(v);return}
+    state.tries=(state.tries||0)+1;save(state);
+    msg.textContent='\u201C'+v.trim()+'\u201D isn\u2019t on the list. Try again.';
+    msg.classList.remove('shake');void msg.offsetWidth;msg.classList.add('shake');
+    inp.value='';lock.disabled=true;inp.focus();
+  });
+  inp.focus({preventScroll:true});
+  function tick(){
+    const rem=state.qStart+SECONDS*1000-Date.now();
+    if(rem<=0){clearInterval(timer);finalize(null);return}
+    fill.style.transform=`scaleX(${rem/(SECONDS*1000)})`;
+    time.textContent=fmtT(rem);
+    const low=rem<=10000;
+    fill.classList.toggle('low',low);time.classList.toggle('low',low);
+  }
+  tick();clearInterval(timer);timer=setInterval(tick,100);
+}
+
+function finalize(raw){
+  if(locked)return;locked=true;clearInterval(timer);
+  let r;
+  if(raw===null){
+    r={status:'timeout',answer:'',tier:-1,pts:0,comment:'No accepted answer in time.'};
+  }else{
+    const hit=LOOKUP[state.idx].get(norm(raw));
+    r={status:'hit',answer:raw.trim(),tier:hit.t,pts:TIERS[hit.t].pts,comment:hit.c};
+  }
+  r.tries=state.tries||0;
+  state.res[state.idx]=r;state.phase='revealed';save(state);render();
+}
+
+const triesTxt=r=>r.tries?` after ${r.tries} wrong ${r.tries===1?'try':'tries'}`:'';
+function reveal(){
+  const r=state.res[state.idx], prev=depthOf(state.res,state.idx), now=prev+r.pts*10;
+  const t=r.tier>=0?TIERS[r.tier]:null;
+  const name=t?t.name:(r.status==='timeout'?"Time's up":'Not on the list');
+  const color=t?t.color:'var(--t0)';
+  const last=state.idx===N-1;
+  setSea(prev,!booted);
+  show(`${header(prev)}${segs()}
+  <section class="reveal">
+    <p class="said">${r.status==='timeout'?'You ran out of time on question '+(state.idx+1)+triesTxt(r)+'.':'You answered <b>'+esc(r.answer)+'</b>'+triesTxt(r)}</p>
+    <div class="tierline"><h2 class="tiername" style="color:${color}">${esc(name)}</h2><p class="gain" style="color:${color}">+${r.pts}</p></div>
+    ${r.comment?`<p class="comment">${esc(r.comment)}</p>`:''}
+    <div class="depthline"><span>Depth</span><strong id="dnum">${fmtM(prev)}</strong></div>
+    <button class="btn" id="next" type="button">${last?'See results':'Next question'}</button>
+  </section>`);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    setSea(now);countTo($('#dnum'),prev,now,1400);countTo($('#hdepth'),prev,now,1400);
+  }));
+  const nx=$('#next');nx.focus({preventScroll:true});
+  nx.addEventListener('click',()=>{
+    if(last){state.phase='done';justFinished=true}
+    else{state.idx++;state.phase='asking';state.qStart=Date.now();state.tries=0}
+    save(state);render();
+  });
+}
+
+function shareText(){
+  const m=depthOf(state.res);
+  return `Philip McKrillion\n${DATA.map((_,i)=>{const r=state.res[i];return r&&r.tier>=0?TIERS[r.tier].sq:MISS_SQ}).join('')}\nDepth: ${fmtM(m)} of ${fmtM(MAX_M)}`;
+}
+async function copyText(t){
+  try{await navigator.clipboard.writeText(t);return true}
+  catch(e){
+    const ta=document.createElement('textarea');ta.value=t;ta.style.cssText='position:fixed;opacity:0';
+    document.body.appendChild(ta);ta.select();let ok=false;
+    try{ok=document.execCommand('copy')}catch(_){}
+    ta.remove();return ok;
+  }
+}
+
+function results(){
+  const m=depthOf(state.res), z=zoneOf(m), pts=pointsOf(state.res);
+  const cards=DATA.map((q,i)=>{
+    const r=state.res[i]||{status:'timeout',tier:-1,pts:0,answer:''};
+    const you=r.status==='hit'
+      ?`You answered <b>${esc(r.answer)}</b>${triesTxt(r)}: ${TIERS[r.tier].name}, +${r.pts}`
+      :r.status==='miss'?`You answered <b>${esc(r.answer)}</b>: not on the list, +0`
+      :'You ran out of time'+triesTxt(r)+': +0';
+    const mine=r.status==='hit'?norm(r.answer):null;
+    const rungs=TIERS.map((t,ti)=>{
+      const ans=q.answers.filter(a=>a.t===ti);
+      if(!ans.length)return '';
+      const chips=ans.map(a=>`<span class="chip${mine===norm(a.a)?' mine':''}" style="--c:${t.color}"${mine===norm(a.a)?' title="Your answer"':''}>${esc(a.a)}</span>`).join('');
+      const quip=ti===4&&ans[0].c?`<p class="quip">${esc(ans[0].c)}</p>`:'';
+      return `<div class="rung"><div class="rn" style="color:${t.color}">${t.name}<span>${t.pts} points</span></div><div class="chips">${chips}</div>${quip}</div>`;
+    }).join('');
+    return `<section class="panel qcard"><header><span class="qn">${i+1}</span><h3>${esc(q.prompt)}</h3></header>
+      <p class="you">${you}</p><div class="ladder">${rungs}</div></section>`;
+  }).join('');
+  show(`${header(justFinished?0:m)}${segs()}
+  ${justFinished?'':'<p class="banner">You already took this dive. Here are your results.</p>'}
+  <section class="final">
+    <p class="reach">You reached</p>
+    <p class="big" id="big">${justFinished?fmtM(0):fmtM(m)}</p>
+    <p class="of">of ${fmtM(MAX_M)} &middot; ${pts} of ${MAX_PTS} points</p>
+    <p class="zone">${z.name}</p>
+    <p class="zonenote">${z.note}</p>
+    <div class="actions"><button class="btn" id="copy" type="button">Copy your result</button></div>
+  </section>
+  <h2 class="listhead">Every answer</h2>
+  <p class="listsub">Here's everything that counted, from most common to rarest.</p>
+  ${cards}`);
+  if(justFinished){
+    setSea(0,true);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      setSea(m);countTo($('#big'),0,m,2200);countTo($('#hdepth'),0,m,2200);
+    }));
+  }else setSea(m,true);
+  $('#copy').addEventListener('click',async e=>{
+    const b=e.currentTarget, ok=await copyText(shareText());
+    b.textContent=ok?'Copied':'Copy failed';setTimeout(()=>{b.textContent='Copy your result'},1800);
+  });
+}
+
+function render(){
+  clearInterval(timer);
+  if(!state)return intro();
+  if(state.phase==='done')return results();
+  if(state.phase==='revealed')return reveal();
+  // asking: if the clock ran out while the page was closed, score it as a timeout
+  if(state.qStart+SECONDS*1000<=Date.now()){locked=false;return finalize(null)}
+  return ask();
+}
+
+render();
+})();
+</script>
+</body>
+</html>
